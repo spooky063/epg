@@ -38,6 +38,7 @@ jobs:
           sudo apt-get install -y jq
 
       - name: Install Python dependencies
+        working-directory: epg-transform
         run: |
           pip install --upgrade pip
           pip install -r requirements.txt
@@ -46,6 +47,7 @@ jobs:
         run: mkdir -p output
 
       - name: Transform XML to JSON
+        working-directory: epg-transform
         run: |
           python transform.py "${{ github.event.inputs.xml_source || 'https://xmltvfr.fr/xmltv/xmltv_tnt.xml.gz' }}" output/epg-data.json
 
@@ -82,9 +84,11 @@ jobs:
           path: ./src/data
 
       - name: Install dependencies
+        working-directory: epg-viewer
         run: yarn install
 
       - name: Build site
+        working-directory: epg-viewer
         run: yarn run build
         env:
           NODE_ENV: production
