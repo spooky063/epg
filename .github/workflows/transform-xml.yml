@@ -22,6 +22,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            .github
+            epg-transform
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -60,6 +64,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            .github
+            epg-viewer
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
