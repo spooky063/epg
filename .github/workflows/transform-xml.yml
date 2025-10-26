@@ -1,0 +1,119 @@
+name: Build Site with EPG Data
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      xml_source:
+        description: 'URL ou chemin du fichier XML source'
+        required: false
+        default: 'https://xmltvfr.fr/xmltv/xmltv_tnt.xml.gz'
+
+jobs:
+  generate-json:
+    name: Generate EPG JSON
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install jq
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
+
+      - name: Install Python dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Create output directory
+        run: mkdir -p output
+
+      - name: Transform XML to JSON
+        run: |
+          python transform.py "${{ github.event.inputs.xml_source || 'https://xmltvfr.fr/xmltv/xmltv_tnt.xml.gz' }}" output/epg-data.json
+
+      - name: Upload JSON as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: epg-data
+          path: output/epg-data.json
+          retention-days: 1
+
+  build-site:
+    name: Build TypeScript Site
+    needs: generate-json
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Download EPG data
+        uses: actions/download-artifact@v4
+        with:
+          name: epg-data
+          path: ./src/data
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Build site
+        run: yarn run build
+        env:
+          NODE_ENV: production
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: site-build-${{ github.sha }}
+          path: dist/
+          retention-days: 1
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build-site
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    steps:
+      - name: Download build
+        uses: actions/download-artifact@v4
+        with:
+          name: site-build-${{ github.sha }}
+          path: ./dist
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload to Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

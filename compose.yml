@@ -1,0 +1,24 @@
+services:
+  xml-transformer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ${PWD}/epg-transform:/usr/src/app
+    environment:
+      - INPUT=${INPUT:-https://xmltvfr.fr/xmltv/xmltv_tnt.xml.gz}
+      - OUTPUT=${OUTPUT:-//usr/src/app/output.json}
+    command: python app.py ${XML_SOURCE:-https://xmltvfr.fr/xmltv/xmltv_tnt.xml.gz} ${OUTPUT:-/usr/src/app/output.json}
+
+  node-app:
+    image: node:22-alpine
+    ports:
+      - 127.0.0.1:4321:4321
+    environment:
+      - YARN_CACHE_FOLDER=/home/node/cache/yarn
+    volumes:
+      - ${PWD}/epg-viewer:/app:cached
+    working_dir: /app
+    user: node
+    stdin_open: true
+    tty: true
