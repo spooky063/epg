@@ -19,16 +19,20 @@ jobs:
     name: Generate EPG JSON
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        working-directory: epg-transform
+
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           sparse-checkout: |
             .github
             epg-transform
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.11'
 
@@ -38,7 +42,6 @@ jobs:
           sudo apt-get install -y jq
 
       - name: Install Python dependencies
-        working-directory: epg-transform
         run: |
           pip install --upgrade pip
           pip install -r requirements.txt
@@ -47,7 +50,6 @@ jobs:
         run: mkdir -p output
 
       - name: Transform XML to JSON
-        working-directory: epg-transform
         run: |
           python app.py "${{ github.event.inputs.xml_source || 'https://xmltvfr.fr/xmltv/xmltv_tnt.xml.gz' }}" output/epg-data.json
 
@@ -63,32 +65,34 @@ jobs:
     needs: generate-json
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        working-directory: epg-viewer
+
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           sparse-checkout: |
             .github
             epg-viewer
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '22'
-          cache: 'npm'
+          cache: 'yarn'
 
       - name: Download EPG data
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: epg-data
           path: ./src/data
 
       - name: Install dependencies
-        working-directory: epg-viewer
         run: yarn install
 
       - name: Build site
-        working-directory: epg-viewer
         run: yarn run build
         env:
           NODE_ENV: production
@@ -113,7 +117,7 @@ jobs:
 
     steps:
       - name: Download build
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: site-build-${{ github.sha }}
           path: ./dist
