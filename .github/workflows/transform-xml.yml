@@ -94,7 +94,7 @@ jobs:
         run: yarn install
 
       - name: Tree
-        run : find . -maxdepth 4 -mindepth 1
+        run : find . -maxdepth 4 -mindepth 1 -not -path "**/node_modules/*" -not -path "**/.git/*"
 
       - name: Build site
         run: yarn run build
