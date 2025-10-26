@@ -94,7 +94,7 @@ jobs:
         run: yarn install
 
       - name: Tree
-        run : find . -maxdepth 2 -mindepth 2
+        run : find . -maxdepth 4 -mindepth 1
 
       - name: Build site
         run: yarn run build
