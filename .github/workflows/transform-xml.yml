@@ -49,7 +49,7 @@ jobs:
       - name: Transform XML to JSON
         working-directory: epg-transform
         run: |
-          python transform.py "${{ github.event.inputs.xml_source || 'https://xmltvfr.fr/xmltv/xmltv_tnt.xml.gz' }}" output/epg-data.json
+          python app.py "${{ github.event.inputs.xml_source || 'https://xmltvfr.fr/xmltv/xmltv_tnt.xml.gz' }}" output/epg-data.json
 
       - name: Upload JSON as artifact
         uses: actions/upload-artifact@v4
