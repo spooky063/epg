@@ -93,9 +93,6 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
-      - name: Tree
-        run : find . -maxdepth 4 -mindepth 1 -not -path "**/node_modules/*" -not -path "**/.git/*"
-
       - name: Build site
         run: yarn run build
         env:
@@ -105,7 +102,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: site-build-${{ github.sha }}
-          path: dist/
+          path: epg-viewer/dist/
           retention-days: 1
 
   deploy:
@@ -124,7 +121,7 @@ jobs:
         uses: actions/download-artifact@v5
         with:
           name: site-build-${{ github.sha }}
-          path: ./dist
+          path: epg-viewer/dist
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -132,7 +129,7 @@ jobs:
       - name: Upload to Pages
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./dist
+          path: epg-viewer/dist
 
       - name: Deploy to GitHub Pages
         id: deployment
