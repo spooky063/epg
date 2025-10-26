@@ -88,7 +88,7 @@ jobs:
         uses: actions/download-artifact@v5
         with:
           name: epg-data
-          path: ./src/data
+          path: epg-viewer/src/data
 
       - name: Install dependencies
         run: yarn install
