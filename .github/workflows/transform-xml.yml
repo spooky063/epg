@@ -93,6 +93,9 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
+      - name: Tree
+        run : find . -maxdepth 2 -mindepth 2
+
       - name: Build site
         run: yarn run build
         env:
